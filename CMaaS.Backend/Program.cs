@@ -1,4 +1,6 @@
 using CMaaS.Backend.Data;
+using CMaaS.Backend.Services.Implementations;
+using CMaaS.Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,16 @@ builder.Services.AddSwaggerGen();
 //PostgreSQL connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register Service Layer (Dependency Injection)
+// Authentication Services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+// Content Management Services
+builder.Services.AddScoped<IContentEntryService, ContentEntryService>();
+builder.Services.AddScoped<IContentTypeService, ContentTypeService>();
+builder.Services.AddScoped<ITenantService, TenantService>();
 
 var app = builder.Build();
 
