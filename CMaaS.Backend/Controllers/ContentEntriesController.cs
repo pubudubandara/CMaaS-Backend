@@ -2,6 +2,7 @@
 using CMaaS.Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using CMaaS.Backend.Dtos;
 
 
 
@@ -40,17 +41,46 @@ namespace CMaaS.Backend.Controllers
             }
             _context.ContentEntries.Add(entry);
             await _context.SaveChangesAsync();
-            return Ok(entry);
+            return CreatedAtAction(nameof(GetEntryById), new { id = entry.Id }, entry);
         }
 
         //Get Entries by Type (GET: api/contententries/{contentTypeId})
         [HttpGet("{contentTypeId}")]
-        public async Task<IActionResult> GetEntriesByType(int contentTypeId)
+        public async Task<IActionResult> GetEntriesByType(int contentTypeId, [FromQuery] FilterDto filter)
         {
-            var entries = await _context.ContentEntries
-                                        .Where(e => e.ContentTypeId == contentTypeId)
-                                        .ToListAsync();
-            return Ok(entries);
+            // Get all entries for the content type from database
+            var allEntries = await _context.ContentEntries
+                                .Where(e => e.ContentTypeId == contentTypeId)
+                                .ToListAsync();
+
+            // Apply search filter in memory (client-side)
+            IEnumerable<ContentEntry> filteredEntries = allEntries;
+            
+            if (!string.IsNullOrEmpty(filter.SearchTerm))
+            {
+                filteredEntries = allEntries.Where(e => 
+                    e.Data.RootElement.ToString().Contains(filter.SearchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Get total count after filtering
+            var totalRecords = filteredEntries.Count();
+
+            // Apply pagination
+            var entries = filteredEntries
+                                .Skip((filter.Page - 1) * filter.PageSize)
+                                .Take(filter.PageSize)
+                                .ToList();
+
+            var response = new
+            {
+                TotalRecords = totalRecords,
+                Page = filter.Page,
+                PageSize = filter.PageSize,
+                TotalPages = (int)Math.Ceiling((double)totalRecords / filter.PageSize),
+                Data = entries
+            };
+
+            return Ok(response);
         }
 
         // 3. Get Single Entry (GET: api/contententries/entry/{id})
