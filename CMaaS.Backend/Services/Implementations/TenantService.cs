@@ -97,5 +97,11 @@ namespace CMaaS.Backend.Services.Implementations
                 throw new Exception($"Failed to delete tenant: {ex.Message}");
             }
         }
+
+        public async Task<int?> GetTenantIdByApiKey(string apiKey)
+        {
+            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.ApiKey == apiKey);
+            return tenant?.Id;
+        }
     }
 }

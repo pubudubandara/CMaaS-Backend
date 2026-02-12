@@ -14,5 +14,8 @@ namespace CMaaS.Backend.Services.Interfaces
 
         // Deletes a tenant by id
         Task<ServiceResult<bool>> DeleteTenantAsync(int id);
+
+        // Gets tenant ID by API key
+        Task<int?> GetTenantIdByApiKey(string apiKey);
     }
 }

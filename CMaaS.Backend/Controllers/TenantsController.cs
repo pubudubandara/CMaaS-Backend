@@ -3,11 +3,13 @@ using CMaaS.Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using CMaaS.Backend.Filters;
 
 namespace CMaaS.Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "SuperAdmin")]
     public class TenantsController : ControllerBase
     {
         private readonly ITenantService _tenantService;
@@ -19,7 +21,6 @@ namespace CMaaS.Backend.Controllers
 
         // Get all tenants
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAllTenants()
         {
             var result = await _tenantService.GetAllTenantsAsync();
@@ -34,7 +35,6 @@ namespace CMaaS.Backend.Controllers
 
         // Create a new tenant
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> CreateTenant([FromBody] Tenant tenant)
         {
             var result = await _tenantService.CreateTenantAsync(tenant);
@@ -48,7 +48,6 @@ namespace CMaaS.Backend.Controllers
         }
         // DELETE: api/tenants/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTenant(int id)
         {
             var result = await _tenantService.DeleteTenantAsync(id);
