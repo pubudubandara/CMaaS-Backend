@@ -8,6 +8,7 @@ namespace CMaaS.Backend.Models
     {
         Admin,
         User,
-        Viewer
+        Viewer,
+        SuperAdmin
     }
 }

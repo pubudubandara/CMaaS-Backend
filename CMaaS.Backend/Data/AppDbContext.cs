@@ -14,6 +14,13 @@ namespace CMaaS.Backend.Data
         public DbSet<ContentEntry> ContentEntries { get; set; }
         public DbSet<User> Users { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
 
+            // Seed sample data
+            modelBuilder.Seed();
         }
+
+    }
 }

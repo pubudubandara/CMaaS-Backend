@@ -10,5 +10,8 @@ namespace CMaaS.Backend.Models
         public JsonDocument Data { get; set; } = JsonDocument.Parse("{}");
         public int ContentTypeId { get; set; }
         public ContentType? ContentType { get; set; }
+
+        public int TenantId { get; set; }
+        public Tenant? Tenant { get; set; }
     }
 }

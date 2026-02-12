@@ -1,95 +1,91 @@
-﻿using CMaaS.Backend.Data;
+﻿using CMaaS.Backend.Dtos;
 using CMaaS.Backend.Models;
+using CMaaS.Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CMaaS.Backend.Dtos;
-
-
+using CMaaS.Backend.Filters;
 
 namespace CMaaS.Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class ContentEntriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IContentEntryService _contentEntryService;
 
-        public ContentEntriesController(AppDbContext context)
+        public ContentEntriesController(IContentEntryService contentEntryService)
         {
-            _context = context;
+            _contentEntryService = contentEntryService;
         }
 
-        //Create Content Entry (POST: api/contententries)
+        // Create a new content entry
         [HttpPost]
         public async Task<IActionResult> CreateEntry([FromBody] ContentEntry entry)
         {
-            //validation
-            if (entry == null)
+            var result = await _contentEntryService.CreateEntryAsync(entry);
+
+            if (!result.IsSuccess)
             {
-                return BadRequest("ContentEntry is required.");
+                return BadRequest(result.ErrorMessage);
             }
 
-            if (entry.Data == null)
-            {
-                return BadRequest("Data is required.");
-            }
-
-            var contentType = await _context.ContentTypes.FindAsync(entry.ContentTypeId);
-            if (contentType == null)
-            {
-                return BadRequest("Invalid ContentTypeId.");
-            }
-            _context.ContentEntries.Add(entry);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetEntryById), new { id = entry.Id }, entry);
+            return CreatedAtAction(nameof(GetEntryById), new { id = result.Data!.Id }, result.Data);
         }
 
-        //Get Entries by Type (GET: api/contententries/{contentTypeId})
+
+        // Get all content entries for a specific content type with filtering and pagination
+
         [HttpGet("{contentTypeId}")]
         public async Task<IActionResult> GetEntriesByType(int contentTypeId, [FromQuery] FilterDto filter)
         {
-            // Get all entries for the content type from database
-            var allEntries = await _context.ContentEntries
-                                .Where(e => e.ContentTypeId == contentTypeId)
-                                .ToListAsync();
+            var result = await _contentEntryService.GetEntriesByTypeAsync(contentTypeId, filter);
 
-            // Apply search filter in memory (client-side)
-            IEnumerable<ContentEntry> filteredEntries = allEntries;
-            
-            if (!string.IsNullOrEmpty(filter.SearchTerm))
+            if (!result.IsSuccess)
             {
-                filteredEntries = allEntries.Where(e => 
-                    e.Data.RootElement.ToString().Contains(filter.SearchTerm, StringComparison.OrdinalIgnoreCase));
+                return BadRequest(result.ErrorMessage);
             }
 
-            // Get total count after filtering
-            var totalRecords = filteredEntries.Count();
-
-            // Apply pagination
-            var entries = filteredEntries
-                                .Skip((filter.Page - 1) * filter.PageSize)
-                                .Take(filter.PageSize)
-                                .ToList();
-
-            var response = new
-            {
-                TotalRecords = totalRecords,
-                Page = filter.Page,
-                PageSize = filter.PageSize,
-                TotalPages = (int)Math.Ceiling((double)totalRecords / filter.PageSize),
-                Data = entries
-            };
-
-            return Ok(response);
+            return Ok(result.Data);
         }
 
-        // 3. Get Single Entry (GET: api/contententries/entry/{id})
+        // Get a single content entry by ID
         [HttpGet("entry/{id}")]
         public async Task<IActionResult> GetEntryById(int id)
         {
-            var entry = await _context.ContentEntries.FindAsync(id);
-            if (entry == null) return NotFound();
-            return Ok(entry);
+            var result = await _contentEntryService.GetEntryByIdAsync(id);
+
+            if (!result.IsSuccess)
+            {
+                return NotFound(result.ErrorMessage);
+            }
+
+            return Ok(result.Data);
+        }
+
+        // DELETE: api/contententries/entry/{id}
+        [HttpDelete("entry/{id}")]
+        public async Task<IActionResult> DeleteEntry(int id)
+        {
+            var result = await _contentEntryService.DeleteEntryAsync(id);
+
+            if (!result.IsSuccess)
+            {
+                if (result.ErrorMessage == "ContentEntry not found.")
+                {
+                    throw new KeyNotFoundException(result.ErrorMessage);
+                }
+                else if (result.ErrorMessage == "You can only delete your own data!")
+                {
+                    throw new UnauthorizedAccessException(result.ErrorMessage);
+                }
+                else
+                {
+                    throw new ArgumentException(result.ErrorMessage);
+                }
+            }
+
+            return NoContent();
         }
     }
 }

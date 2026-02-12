@@ -1,53 +1,48 @@
-﻿using CMaaS.Backend.Data;
-using Microsoft.AspNetCore.Http;
+﻿using CMaaS.Backend.Models;
+using CMaaS.Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CMaaS.Backend.Models;
-
 
 namespace CMaaS.Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class ContentTypesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IContentTypeService _contentTypeService;
 
-        public ContentTypesController(AppDbContext context)
+        public ContentTypesController(IContentTypeService contentTypeService)
         {
-            _context = context;
+            _contentTypeService = contentTypeService;
         }
 
-        //Create Schema(POST: api/contenttypes)
+        // Create a new content type (schema)
         [HttpPost]
-        public async Task<IActionResult> CreateContentType([FromBody] ContentType contentType) 
+        public async Task<IActionResult> CreateContentType([FromBody] ContentType contentType)
         {
-            //validation
-            if (contentType == null)
+            var result = await _contentTypeService.CreateContentTypeAsync(contentType);
+
+            if (!result.IsSuccess)
             {
-                return BadRequest("ContentType is required.");
-            }
-            if (contentType.TenantId ==0)
-            {
-                return BadRequest("TenantId is required.");
-            }
-            if (string.IsNullOrWhiteSpace(contentType.Name))
-            {
-                return BadRequest("Name is required.");
+                return BadRequest(result.ErrorMessage);
             }
 
-            _context.ContentTypes.Add(contentType);
-            await _context.SaveChangesAsync();
-
-            return Ok(contentType);
+            return CreatedAtAction(nameof(GetContentTypes), new { tenantId = result.Data!.TenantId }, result.Data);
         }
 
-        //Get All Schemas for a Tenant (GET: api/contenttypes/{tenantId})
-        [HttpGet("{tenantId}")]
-        public async Task<IActionResult> GetContentTypes(int tenantId)
+        // Get all content types 
+        [HttpGet]
+        public async Task<IActionResult> GetContentTypes()
         {
-            var contentTypes = await _context.ContentTypes.Where(ct => ct.TenantId == tenantId).ToListAsync();
-            return Ok(contentTypes);
+            var result = await _contentTypeService.GetAllContentTypesAsync();
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { message = result.ErrorMessage });
+            }
+
+            return Ok(result.Data);
         }
     }
 }
