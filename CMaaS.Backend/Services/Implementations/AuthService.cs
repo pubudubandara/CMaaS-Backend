@@ -51,12 +51,12 @@ namespace CMaaS.Backend.Services.Implementations
 
             try
             {
-                // Step A: Create Tenant (Company)
+                // Step A: Create Tenant (Company) - NO automatic API key
                 var tenant = new Tenant
                 {
                     Name = request.OrganizationName,
-                    PlanType = SubscriptionPlan.Free,
-                    ApiKey = Guid.NewGuid().ToString("N") // Generate API Key
+                    PlanType = SubscriptionPlan.Free
+                    // API key generation removed - use ApiKeyService.CreateApiKeyAsync() instead
                 };
 
                 _context.Tenants.Add(tenant);
@@ -78,12 +78,12 @@ namespace CMaaS.Backend.Services.Implementations
                 // Step C: Commit Transaction
                 await transaction.CommitAsync();
 
-                // Return success response
+                // Return success response - NO API key returned
                 var response = new RegisterResponseDto
                 {
-                    Message = "Company registered successfully!",
+                    Message = "Company registered successfully! Use the Admin Dashboard to create API keys.",
                     TenantId = tenant.Id,
-                    ApiKey = tenant.ApiKey
+                    ApiKey = string.Empty // No API key returned during registration
                 };
 
                 return ServiceResult<RegisterResponseDto>.Success(response);
