@@ -99,5 +99,22 @@ namespace CMaaS.Backend.Controllers
 
             return NoContent();
         }
+
+        // Toggle visibility of a content entry
+        [HttpPatch("{id}/toggle-visibility")]
+        public async Task<IActionResult> ToggleVisibility(int id)
+        {
+            var result = await _contentEntryService.ToggleVisibilityAsync(id);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+
+            return Ok(new
+            {
+                message = "Visibility toggled successfully",
+            });
+        }
     }
 }

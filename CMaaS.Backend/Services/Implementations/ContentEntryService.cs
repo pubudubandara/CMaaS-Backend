@@ -128,6 +128,37 @@ namespace CMaaS.Backend.Services.Implementations
             return ServiceResult<bool>.Success(true);
         }
 
+        public async Task<ServiceResult<ContentEntry>> ToggleVisibilityAsync(int id)
+        {
+            var tenantId = _userContext.GetTenantId();
+            if (tenantId == null)
+                return ServiceResult<ContentEntry>.Failure("Authentication required.");
+
+            if (id <= 0)
+                return ServiceResult<ContentEntry>.Failure("Invalid content entry ID.");
+
+            try
+            {
+                // Find the entry and verify it belongs to the authenticated tenant
+                var entry = await _context.ContentEntries
+                    .FirstOrDefaultAsync(e => e.Id == id && e.TenantId == tenantId);
+
+                if (entry == null)
+                    return ServiceResult<ContentEntry>.Failure("ContentEntry not found or access denied.");
+
+                // Toggle the visibility
+                entry.IsVisible = !entry.IsVisible;
+
+                await _context.SaveChangesAsync();
+
+                return ServiceResult<ContentEntry>.Success(entry);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<ContentEntry>.Failure($"Failed to toggle visibility: {ex.Message}");
+            }
+        }
+
         public async Task<ServiceResult<ContentEntry>> UpdateEntryAsync(int id, ContentEntry entry)
         {
             // Get tenant ID from authenticated user

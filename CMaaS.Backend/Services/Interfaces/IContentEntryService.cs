@@ -20,5 +20,8 @@ namespace CMaaS.Backend.Services.Interfaces
 
         // Deletes a content entry by ID
         Task<ServiceResult<bool>> DeleteEntryAsync(int id);
+
+        // Toggles the visibility of a content entry
+        Task<ServiceResult<ContentEntry>> ToggleVisibilityAsync(int id);
     }
 }

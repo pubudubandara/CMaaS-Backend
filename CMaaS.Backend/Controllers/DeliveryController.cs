@@ -23,14 +23,13 @@ namespace CMaaS.Backend.Controllers
             _contentEntryService = contentEntryService;
         }
 
-        /// <summary>
-        /// Get all content entries for a specific content type with pagination and filtering
-        /// Supports both JWT and API Key authentication
-        /// </summary>
+
+        // Get all content entries for a specific content type with pagination and filtering
         [HttpGet("{contentTypeName}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetContent(string contentTypeName, [FromQuery] FilterDto filter)
-        {
+        {   
+
             // 1. Get Tenant ID from User Context (Works for both JWT and API Key!)
             var tenantId = _userContext.GetTenantId();
 
@@ -56,9 +55,9 @@ namespace CMaaS.Backend.Controllers
 
             try
             {
-                // 4. Query data with pagination and search
+                // 4. Query data with pagination and search - only visible items
                 var query = _context.ContentEntries
-                    .Where(e => e.ContentTypeId == contentType.Id && e.TenantId == tenantId)
+                    .Where(e => e.ContentTypeId == contentType.Id && e.TenantId == tenantId && e.IsVisible)
                     .AsNoTracking()
                     .AsQueryable();
 
@@ -98,11 +97,8 @@ namespace CMaaS.Backend.Controllers
                 return BadRequest(new { message = $"Error retrieving content: {ex.Message}" });
             }
         }
-
-        /// <summary>
-        /// Get a specific content entry by ID for a given content type
-        /// Supports both JWT and API Key authentication
-        /// </summary>
+        
+        // Get a specific content entry by ID for a given content type
         [HttpGet("{contentTypeName}/{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetContentById(string contentTypeName, int id)
@@ -132,10 +128,10 @@ namespace CMaaS.Backend.Controllers
                     return NotFound(new { message = $"Content Type '{contentTypeName}' not found for this tenant." });
                 }
 
-                // 4. Get the specific content entry
+                // 4. Get the specific content entry - only if visible
                 var entry = await _context.ContentEntries
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(e => e.Id == id && e.ContentTypeId == contentType.Id && e.TenantId == tenantId);
+                    .FirstOrDefaultAsync(e => e.Id == id && e.ContentTypeId == contentType.Id && e.TenantId == tenantId && e.IsVisible);
 
                 if (entry == null)
                 {
