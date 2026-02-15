@@ -109,6 +109,9 @@ builder.Services.AddScoped<IContentTypeService, ContentTypeService>();
 // API Key Management Service
 builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
 
+// Dashboard Service
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+
 // Register UserContextService (This helps get TenantId easily)
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 
