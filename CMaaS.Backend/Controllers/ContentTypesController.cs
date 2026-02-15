@@ -64,5 +64,19 @@ namespace CMaaS.Backend.Controllers
 
             return Ok(result.Data);
         }
+
+        // Update a content type
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateContentType(int id, [FromBody] ContentType contentType)
+        {
+            var result = await _contentTypeService.UpdateContentTypeAsync(id, contentType);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+
+            return Ok(result.Data);
+        }
     }
 }

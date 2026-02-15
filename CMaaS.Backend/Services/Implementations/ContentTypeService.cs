@@ -120,5 +120,67 @@ namespace CMaaS.Backend.Services.Implementations
                 return ServiceResult<ContentType>.Failure($"Failed to retrieve content type: {ex.Message}");
             }
         }
+
+        public async Task<ServiceResult<ContentType>> UpdateContentTypeAsync(int id, ContentType contentType)
+        {
+            var tenantId = _userContext.GetTenantId();
+            if (tenantId == null)
+            {
+                return ServiceResult<ContentType>.Failure("Authentication required.");
+            }
+
+            if (id <= 0)
+            {
+                return ServiceResult<ContentType>.Failure("Invalid content type ID.");
+            }
+
+            if (contentType == null)
+            {
+                return ServiceResult<ContentType>.Failure("ContentType is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(contentType.Name))
+            {
+                return ServiceResult<ContentType>.Failure("Name is required.");
+            }
+
+            if (contentType.Schema == null)
+            {
+                return ServiceResult<ContentType>.Failure("Schema is required.");
+            }
+
+            try
+            {
+                // Find the existing content type
+                var existingContentType = await _context.ContentTypes
+                    .FirstOrDefaultAsync(ct => ct.Id == id && ct.TenantId == tenantId);
+
+                if (existingContentType == null)
+                {
+                    return ServiceResult<ContentType>.Failure("Content type not found or access denied.");
+                }
+
+                // Check if the new name already exists for another content type
+                var nameExists = await _context.ContentTypes
+                    .AnyAsync(ct => ct.Name == contentType.Name && ct.TenantId == tenantId && ct.Id != id);
+
+                if (nameExists)
+                {
+                    return ServiceResult<ContentType>.Failure($"A content type with name '{contentType.Name}' already exists.");
+                }
+
+                // Update the content type
+                existingContentType.Name = contentType.Name;
+                existingContentType.Schema = contentType.Schema;
+
+                await _context.SaveChangesAsync();
+
+                return ServiceResult<ContentType>.Success(existingContentType);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<ContentType>.Failure($"Failed to update content type: {ex.Message}");
+            }
+        }
     }
 }

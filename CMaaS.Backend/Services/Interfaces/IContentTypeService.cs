@@ -13,5 +13,8 @@ namespace CMaaS.Backend.Services.Interfaces
 
         // Gets a specific content type by ID for the authenticated tenant
         Task<ServiceResult<ContentType>> GetContentTypeByIdAsync(int id);
+
+        // Updates an existing content type
+        Task<ServiceResult<ContentType>> UpdateContentTypeAsync(int id, ContentType contentType);
     }
 }
