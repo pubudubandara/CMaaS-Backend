@@ -1,3 +1,4 @@
+```markdown
 # SchemaFlow - Content Management as a Service API
 
 A powerful, multi-tenant Content Management as a Service (CMS) API built with ASP.NET Core 8 and Entity Framework Core, supporting both JWT and API Key authentication.
@@ -15,7 +16,7 @@ A powerful, multi-tenant Content Management as a Service (CMS) API built with AS
 - [Database Models](#database-models)
 - [Project Structure](#project-structure)
 
-## 🎯 Overview
+## <a id="overview"></a>🎯 Overview
 
 SchemaFlow is a flexible, multi-tenant content management system that allows organizations to:
 - Create custom content types (schemas)
@@ -24,7 +25,7 @@ SchemaFlow is a flexible, multi-tenant content management system that allows org
 - Manage API keys for programmatic access
 - View dashboard statistics
 
-## ✨ Features
+## <a id="features"></a>✨ Features
 
 - **Multi-Tenant Architecture**: Complete data isolation per tenant
 - **Dual Authentication**: JWT tokens and API Keys
@@ -35,7 +36,7 @@ SchemaFlow is a flexible, multi-tenant content management system that allows org
 - **Pagination & Filtering**: Built-in support for large datasets
 - **Request Logging**: Comprehensive logging for debugging
 
-## 🛠️ Tech Stack
+## <a id="tech-stack"></a>🛠️ Tech Stack
 
 - **Framework**: ASP.NET Core 8
 - **Database**: PostgreSQL
@@ -44,26 +45,28 @@ SchemaFlow is a flexible, multi-tenant content management system that allows org
 - **Validation**: FluentValidation
 - **Hashing**: BCrypt.Net
 
-## 📦 Prerequisites
+## <a id="prerequisites"></a>📦 Prerequisites
 
 - .NET 8 SDK or higher
 - PostgreSQL 12+
 - Visual Studio 2022 or VS Code
 - Git
 
-## 🚀 Getting Started
+## <a id="getting-started"></a>🚀 Getting Started
 
 ### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
 cd CMaaS.Backend
+
 ```
 
 ### 2. Install Dependencies
 
 ```bash
 dotnet restore
+
 ```
 
 ### 3. Configure Database
@@ -79,23 +82,26 @@ Create a PostgreSQL database and update `appsettings.json`:
     "SecretKey": "your-super-secret-key-min-32-characters-long"
   }
 }
+
 ```
 
 ### 4. Apply Migrations
 
 ```bash
 dotnet ef database update
+
 ```
 
 ### 5. Run the Application
 
 ```bash
 dotnet run
+
 ```
 
 The API will be available at `http://localhost:5000` or `https://localhost:5001`
 
-## ⚙️ Configuration
+## <a id="configuration"></a>⚙️ Configuration
 
 ### JWT Settings (appsettings.json)
 
@@ -105,6 +111,7 @@ The API will be available at `http://localhost:5000` or `https://localhost:5001`
     "SecretKey": "your-secret-key-must-be-at-least-32-characters-long"
   }
 }
+
 ```
 
 ### Database Connection
@@ -115,18 +122,22 @@ The API will be available at `http://localhost:5000` or `https://localhost:5001`
     "DefaultConnection": "Host=localhost;Port=5432;Database=schemaflow_db;Username=postgres;Password=password"
   }
 }
+
 ```
 
-## 📚 API Endpoints
+## <a id="api-endpoints"></a>📚 API Endpoints
 
 ### Authentication
 
 #### Register Company
+
 ```
 POST /api/Auth/register-company
+
 ```
 
 **Request Body:**
+
 ```json
 {
   "organizationName": "Acme Corporation",
@@ -134,56 +145,69 @@ POST /api/Auth/register-company
   "email": "admin@acme.com",
   "password": "SecurePassword123!"
 }
+
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "message": "Company registered successfully! Use the Admin Dashboard to create API keys.",
   "tenantId": 1,
   "apiKey": ""
 }
+
 ```
 
 #### Login
+
 ```
 POST /api/Auth/login
+
 ```
 
 **Request Body:**
+
 ```json
 {
   "email": "admin@acme.com",
   "password": "SecurePassword123!"
 }
+
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
+
 ```
 
 **JWT Token Contains:**
-- `nameid`: User ID
-- `email`: User email
-- `FullName`: User's full name
-- `TenantId`: Organization ID
-- `TenantName`: Organization name
-- `role`: User role (Admin, Editor, Viewer)
+
+* `nameid`: User ID
+* `email`: User email
+* `FullName`: User's full name
+* `TenantId`: Organization ID
+* `TenantName`: Organization name
+* `role`: User role (Admin, Editor, Viewer)
 
 ---
 
 ### Content Types
 
 #### Create Content Type
+
 ```
 POST /api/ContentTypes
 Authorization: Bearer {token}
+
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "Blog Post",
@@ -194,9 +218,11 @@ Authorization: Bearer {token}
     "publishedDate": "date"
   }
 }
+
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -205,15 +231,19 @@ Authorization: Bearer {token}
   "tenantId": 1,
   "createdAt": "2025-02-14T10:30:00Z"
 }
+
 ```
 
 #### Get All Content Types
+
 ```
 GET /api/ContentTypes/{tenantId}
 Authorization: Bearer {token}
+
 ```
 
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -223,15 +253,19 @@ Authorization: Bearer {token}
     "tenantId": 1
   }
 ]
+
 ```
 
 #### Get Content Type by ID
+
 ```
 GET /api/ContentTypes/{id}
 Authorization: Bearer {token}
+
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -239,23 +273,29 @@ Authorization: Bearer {token}
   "schema": {...},
   "tenantId": 1
 }
+
 ```
 
 #### Update Content Type
+
 ```
 PUT /api/ContentTypes/{id}
 Authorization: Bearer {token}
+
 ```
 
 **Request Body:**
+
 ```json
 {
   "name": "Updated Blog Post",
   "schema": {...}
 }
+
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -263,6 +303,7 @@ Authorization: Bearer {token}
   "schema": {...},
   "tenantId": 1
 }
+
 ```
 
 ---
@@ -270,12 +311,15 @@ Authorization: Bearer {token}
 ### Content Entries
 
 #### Create Content Entry
+
 ```
 POST /api/ContentEntries
 Authorization: Bearer {token}
+
 ```
 
 **Request Body:**
+
 ```json
 {
   "contentTypeId": 1,
@@ -285,9 +329,11 @@ Authorization: Bearer {token}
     "author": "John Doe"
   }
 }
+
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -297,15 +343,19 @@ Authorization: Bearer {token}
   "isVisible": true,
   "createdAt": "2025-02-14T10:30:00Z"
 }
+
 ```
 
 #### Get Entries by Content Type
+
 ```
 GET /api/ContentEntries/{contentTypeId}?page=1&pageSize=10&searchTerm=optional
 Authorization: Bearer {token}
+
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "totalRecords": 25,
@@ -314,15 +364,19 @@ Authorization: Bearer {token}
   "totalPages": 3,
   "data": [...]
 }
+
 ```
 
 #### Get Entry by ID
+
 ```
 GET /api/ContentEntries/entry/{id}
 Authorization: Bearer {token}
+
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -331,15 +385,19 @@ Authorization: Bearer {token}
   "tenantId": 1,
   "isVisible": true
 }
+
 ```
 
 #### Toggle Entry Visibility
+
 ```
 PATCH /api/ContentEntries/{id}/toggle-visibility
 Authorization: Bearer {token}
+
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Visibility toggled successfully",
@@ -350,6 +408,7 @@ Authorization: Bearer {token}
     "isVisible": false
   }
 }
+
 ```
 
 ---
@@ -357,12 +416,15 @@ Authorization: Bearer {token}
 ### Content Delivery (Public API)
 
 #### Get Public Entries (Only Visible)
+
 ```
 GET /api/Delivery/{contentTypeName}?page=1&pageSize=10&searchTerm=optional
 X-Api-Key: {api_key}
+
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "meta": {
@@ -380,15 +442,19 @@ X-Api-Key: {api_key}
     }
   ]
 }
+
 ```
 
 #### Get Single Public Entry
+
 ```
 GET /api/Delivery/{contentTypeName}/{id}
 X-Api-Key: {api_key}
+
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -397,6 +463,7 @@ X-Api-Key: {api_key}
   "contentTypeName": "Blog Post",
   "tenantId": 1
 }
+
 ```
 
 ---
@@ -404,12 +471,15 @@ X-Api-Key: {api_key}
 ### Dashboard
 
 #### Get Dashboard Statistics
+
 ```
 GET /api/Dashboard/stats
 Authorization: Bearer {token}
+
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "totalContentTypes": 5,
@@ -423,6 +493,7 @@ Authorization: Bearer {token}
     }
   ]
 }
+
 ```
 
 ---
@@ -430,55 +501,64 @@ Authorization: Bearer {token}
 ### Tenants
 
 #### Get All Tenants
+
 ```
 GET /api/Tenants
 Authorization: Bearer {token}
+
 ```
 
 #### Create Tenant
+
 ```
 POST /api/Tenants
 Authorization: Bearer {token}
+
 ```
 
 ---
 
-## 🔐 Authentication
+## <a id="authentication"></a>🔐 Authentication
 
 ### JWT Bearer Token
 
 Include the token in the `Authorization` header:
 
 ```bash
-curl -H "Authorization: Bearer {token}" https://api.example.com/api/ContentTypes
+curl -H "Authorization: Bearer {token}" [https://api.example.com/api/ContentTypes](https://api.example.com/api/ContentTypes)
+
 ```
 
 **Token Contains:**
-- User ID
-- Email
-- Full Name
-- Tenant ID
-- Tenant Name (Organization)
-- User Role
+
+* User ID
+* Email
+* Full Name
+* Tenant ID
+* Tenant Name (Organization)
+* User Role
 
 ### API Key
 
 Include the API key in the `X-Api-Key` header:
 
 ```bash
-curl -H "X-Api-Key: {api_key}" https://api.example.com/api/Delivery/BlogPost
+curl -H "X-Api-Key: {api_key}" [https://api.example.com/api/Delivery/BlogPost](https://api.example.com/api/Delivery/BlogPost)
+
 ```
 
 **API Key Claims:**
-- Tenant ID
-- API Key ID
-- API Key Name
+
+* Tenant ID
+* API Key ID
+* API Key Name
 
 ---
 
-## 📊 Database Models
+## <a id="database-models"></a>📊 Database Models
 
 ### User
+
 ```csharp
 public class User
 {
@@ -490,9 +570,11 @@ public class User
     public UserRole Role { get; set; }
     public Tenant? Tenant { get; set; }
 }
+
 ```
 
 ### Tenant
+
 ```csharp
 public class Tenant
 {
@@ -502,9 +584,11 @@ public class Tenant
     public DateTime CreatedAt { get; set; }
     public ICollection<ApiKey> ApiKeys { get; set; }
 }
+
 ```
 
 ### ContentType
+
 ```csharp
 public class ContentType
 {
@@ -515,9 +599,11 @@ public class ContentType
     public DateTime CreatedAt { get; set; }
     public Tenant? Tenant { get; set; }
 }
+
 ```
 
 ### ContentEntry
+
 ```csharp
 public class ContentEntry
 {
@@ -530,9 +616,11 @@ public class ContentEntry
     public ContentType? ContentType { get; set; }
     public Tenant? Tenant { get; set; }
 }
+
 ```
 
 ### ApiKey
+
 ```csharp
 public class ApiKey
 {
@@ -543,11 +631,12 @@ public class ApiKey
     public DateTime CreatedAt { get; set; }
     public Tenant? Tenant { get; set; }
 }
+
 ```
 
 ---
 
-## 📁 Project Structure
+## <a id="project-structure"></a>📁 Project Structure
 
 ```
 SchemaFlow.Backend/
@@ -601,6 +690,7 @@ SchemaFlow.Backend/
 ├── Program.cs
 ├── appsettings.json
 └── appsettings.Development.json
+
 ```
 
 ---
@@ -610,6 +700,7 @@ SchemaFlow.Backend/
 ### Complete Workflow Example
 
 #### 1. Register Company
+
 ```bash
 curl -X POST https://localhost:5001/api/Auth/register-company \
   -H "Content-Type: application/json" \
@@ -619,9 +710,11 @@ curl -X POST https://localhost:5001/api/Auth/register-company \
     "email": "john@acme.com",
     "password": "SecurePass123!"
   }'
+
 ```
 
 #### 2. Login
+
 ```bash
 curl -X POST https://localhost:5001/api/Auth/login \
   -H "Content-Type: application/json" \
@@ -629,9 +722,11 @@ curl -X POST https://localhost:5001/api/Auth/login \
     "email": "john@acme.com",
     "password": "SecurePass123!"
   }'
+
 ```
 
 #### 3. Create Content Type
+
 ```bash
 curl -X POST https://localhost:5001/api/ContentTypes \
   -H "Authorization: Bearer {token}" \
@@ -644,9 +739,11 @@ curl -X POST https://localhost:5001/api/ContentTypes \
       "author": "string"
     }
   }'
+
 ```
 
 #### 4. Create Content Entry
+
 ```bash
 curl -X POST https://localhost:5001/api/ContentEntries \
   -H "Authorization: Bearer {token}" \
@@ -659,12 +756,15 @@ curl -X POST https://localhost:5001/api/ContentEntries \
       "author": "John"
     }
   }'
+
 ```
 
 #### 5. Get Public Content (via API Key)
+
 ```bash
 curl -X GET https://localhost:5001/api/Delivery/BlogPost?page=1 \
   -H "X-Api-Key: {api_key}"
+
 ```
 
 ---
@@ -677,15 +777,17 @@ All error responses follow this format:
 {
   "message": "Error description"
 }
+
 ```
 
 **Common HTTP Status Codes:**
-- `200 OK` - Successful request
-- `201 Created` - Resource created successfully
-- `400 Bad Request` - Invalid request parameters
-- `401 Unauthorized` - Missing or invalid authentication
-- `404 Not Found` - Resource not found
-- `500 Internal Server Error` - Server error
+
+* `200 OK` - Successful request
+* `201 Created` - Resource created successfully
+* `400 Bad Request` - Invalid request parameters
+* `401 Unauthorized` - Missing or invalid authentication
+* `404 Not Found` - Resource not found
+* `500 Internal Server Error` - Server error
 
 ---
 
@@ -695,12 +797,15 @@ All list endpoints support pagination:
 
 ```
 GET /api/endpoint?page=1&pageSize=10&searchTerm=optional
+
 ```
 
 **Parameters:**
-- `page`: Page number (default: 1)
-- `pageSize`: Number of records per page (default: 10)
-- `searchTerm`: Optional search filter
+
+* `page`: Page number (default: 1)
+* `pageSize`: Number of records per page (default: 10)
+* `searchTerm`: Optional search filter
 
 ---
 
+```
