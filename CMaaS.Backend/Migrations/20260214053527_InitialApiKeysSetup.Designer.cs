@@ -4,6 +4,7 @@ using System.Text.Json;
 using CMaaS.Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CMaaS.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260214053527_InitialApiKeysSetup")]
+    partial class InitialApiKeysSetup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,15 +66,9 @@ namespace CMaaS.Backend.Migrations
                     b.Property<int>("ContentTypeId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<JsonDocument>("Data")
                         .IsRequired()
                         .HasColumnType("jsonb");
-
-                    b.Property<bool>("IsVisible")
-                        .HasColumnType("boolean");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("integer");
@@ -89,36 +86,28 @@ namespace CMaaS.Backend.Migrations
                         {
                             Id = 1,
                             ContentTypeId = 1,
-                            CreatedAt = new DateTime(2026, 2, 14, 13, 15, 24, 912, DateTimeKind.Utc).AddTicks(4184),
                             Data = System.Text.Json.JsonDocument.Parse("{\"name\":\"Laptop\",\"description\":\"High-performance laptop\",\"price\":999.99,\"category\":\"Electronics\"}", new System.Text.Json.JsonDocumentOptions()),
-                            IsVisible = true,
                             TenantId = 1
                         },
                         new
                         {
                             Id = 2,
                             ContentTypeId = 1,
-                            CreatedAt = new DateTime(2026, 2, 14, 13, 15, 24, 912, DateTimeKind.Utc).AddTicks(4224),
                             Data = System.Text.Json.JsonDocument.Parse("{\"name\":\"Book\",\"description\":\"Programming guide\",\"price\":29.99,\"category\":\"Education\"}", new System.Text.Json.JsonDocumentOptions()),
-                            IsVisible = true,
                             TenantId = 1
                         },
                         new
                         {
                             Id = 3,
                             ContentTypeId = 2,
-                            CreatedAt = new DateTime(2026, 2, 14, 13, 15, 24, 912, DateTimeKind.Utc).AddTicks(4251),
                             Data = System.Text.Json.JsonDocument.Parse("{\"title\":\"Getting Started with CMaaS\",\"content\":\"This is a sample blog post about CMaaS.\",\"author\":\"Admin\",\"publishDate\":\"2023-01-01\"}", new System.Text.Json.JsonDocumentOptions()),
-                            IsVisible = true,
                             TenantId = 1
                         },
                         new
                         {
                             Id = 4,
                             ContentTypeId = 3,
-                            CreatedAt = new DateTime(2026, 2, 14, 13, 15, 24, 912, DateTimeKind.Utc).AddTicks(4283),
                             Data = System.Text.Json.JsonDocument.Parse("{\"name\":\"Tablet\",\"price\":299.99,\"stock\":50}", new System.Text.Json.JsonDocumentOptions()),
-                            IsVisible = true,
                             TenantId = 2
                         });
                 });
@@ -203,7 +192,7 @@ namespace CMaaS.Backend.Migrations
                         {
                             Id = 1,
                             ApiKey = "983d308bd9f340df956c8fedcdf9476c",
-                            CreatedAt = new DateTime(2026, 2, 14, 13, 15, 24, 912, DateTimeKind.Utc).AddTicks(3657),
+                            CreatedAt = new DateTime(2026, 2, 14, 5, 35, 26, 685, DateTimeKind.Utc).AddTicks(7929),
                             Name = "Sample Tenant 1",
                             PlanType = 0
                         },
@@ -211,7 +200,7 @@ namespace CMaaS.Backend.Migrations
                         {
                             Id = 2,
                             ApiKey = "abc123def456ghi789jkl012mno345",
-                            CreatedAt = new DateTime(2026, 2, 14, 13, 15, 24, 912, DateTimeKind.Utc).AddTicks(3659),
+                            CreatedAt = new DateTime(2026, 2, 14, 5, 35, 26, 685, DateTimeKind.Utc).AddTicks(7931),
                             Name = "Sample Tenant 2",
                             PlanType = 1
                         });

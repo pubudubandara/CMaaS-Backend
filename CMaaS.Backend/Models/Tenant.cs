@@ -11,5 +11,7 @@
         public SubscriptionPlan PlanType { get; set; } = SubscriptionPlan.Free;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
     }
 }

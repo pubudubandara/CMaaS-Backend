@@ -10,5 +10,11 @@ namespace CMaaS.Backend.Models
         public JsonDocument Data { get; set; } = JsonDocument.Parse("{}");
         public int ContentTypeId { get; set; }
         public ContentType? ContentType { get; set; }
+
+        public int TenantId { get; set; }
+        public Tenant? Tenant { get; set; }
+        public bool IsVisible { get; set; } = true;
+        // Timestamp when the content entry was created
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
