@@ -1,4 +1,4 @@
-```markdown
+
 # SchemaFlow - Content Management as a Service API
 
 A powerful, multi-tenant Content Management as a Service (CMS) API built with ASP.NET Core 8 and Entity Framework Core, supporting both JWT and API Key authentication.
