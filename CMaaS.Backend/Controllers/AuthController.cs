@@ -70,5 +70,47 @@ namespace CMaaS.Backend.Controllers
 
             return Ok(new { message = result.Data });
         }
+
+        // Forgot password - sends reset email
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequestDto request)
+        {
+            var result = await _authService.ForgotPasswordAsync(request);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { message = result.ErrorMessage });
+            }
+
+            return Ok(new { message = result.Data });
+        }
+
+        // Validate password reset token
+        [HttpPost("validate-reset-token")]
+        public async Task<IActionResult> ValidateResetToken(ValidatePasswordResetTokenRequestDto request)
+        {
+            var result = await _authService.ValidatePasswordResetTokenAsync(request);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { message = result.ErrorMessage });
+            }
+
+            return Ok(new { message = result.Data });
+        }
+
+        // Reset password with token
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequestDto request)
+        {
+            var result = await _authService.ResetPasswordAsync(request);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { message = result.ErrorMessage });
+            }
+
+            return Ok(new { message = result.Data });
+        }
     }
 }

@@ -17,5 +17,14 @@ namespace CMaaS.Backend.Services.Interfaces
 
         // Resend verification email
         Task<ServiceResult<string>> ResendVerificationEmailAsync(ResendVerificationEmailDto request);
+
+        // Send password reset email
+        Task<ServiceResult<string>> ForgotPasswordAsync(ForgotPasswordRequestDto request);
+
+        // Validate password reset token
+        Task<ServiceResult<string>> ValidatePasswordResetTokenAsync(ValidatePasswordResetTokenRequestDto request);
+
+        // Reset password with token
+        Task<ServiceResult<string>> ResetPasswordAsync(ResetPasswordRequestDto request);
     }
 }

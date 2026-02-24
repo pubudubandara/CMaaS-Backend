@@ -291,9 +291,183 @@ namespace CMaaS.Backend.Services.Implementations
             }
         }
 
-        /// <summary>
-        /// Generate a random secure token for email verification or password reset
-        /// </summary>
+        public async Task<ServiceResult<string>> ForgotPasswordAsync(ForgotPasswordRequestDto request)
+        {
+            // 1. Validate request
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                return ServiceResult<string>.Failure("Email is required.");
+            }
+
+            // 2. Find user by email
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (user == null)
+            {
+                // Return generic message for security (don't reveal if user exists)
+                return ServiceResult<string>.Success("If the email exists, a password reset link will be sent shortly.");
+            }
+
+            // 3. Generate password reset token
+            try
+            {
+                var resetToken = GenerateToken();
+                var tokenExpiry = DateTime.UtcNow.AddHours(1); // Token expires in 1 hour
+
+                user.PasswordResetToken = resetToken;
+                user.PasswordResetTokenExpiry = tokenExpiry;
+
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                // Send password reset email
+                var frontendUrl = _configuration["AppSettings:FrontendUrl"] ?? "http://localhost:3000";
+                var resetLink = $"{frontendUrl}/reset-password?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(resetToken)}";
+
+                var emailSent = await _emailService.SendPasswordResetEmailAsync(
+                    user.Email,
+                    user.FullName,
+                    resetToken,
+                    resetLink);
+
+                if (!emailSent)
+                {
+                    _logger.LogWarning($"Failed to send password reset email to {user.Email}, but token was generated.");
+                }
+
+                return ServiceResult<string>.Success("If the email exists, a password reset link will be sent shortly.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Forgot password failed: {ex.Message}");
+                return ServiceResult<string>.Failure($"Forgot password failed: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<string>> ValidatePasswordResetTokenAsync(ValidatePasswordResetTokenRequestDto request)
+        {
+            // 1. Validate request
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                return ServiceResult<string>.Failure("Email is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Token))
+            {
+                return ServiceResult<string>.Failure("Reset token is required.");
+            }
+
+            // 2. Find user by email
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (user == null)
+            {
+                return ServiceResult<string>.Failure("User not found.");
+            }
+
+            // 3. Validate token and expiry
+            if (user.PasswordResetToken != request.Token)
+            {
+                return ServiceResult<string>.Failure("Invalid reset token.");
+            }
+
+            if (user.PasswordResetTokenExpiry == null || user.PasswordResetTokenExpiry < DateTime.UtcNow)
+            {
+                return ServiceResult<string>.Failure("Reset token has expired.");
+            }
+
+            return ServiceResult<string>.Success("Token is valid.");
+        }
+
+        public async Task<ServiceResult<string>> ResetPasswordAsync(ResetPasswordRequestDto request)
+        {
+            // 1. Validate request
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                return ServiceResult<string>.Failure("Email is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Token))
+            {
+                return ServiceResult<string>.Failure("Reset token is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                return ServiceResult<string>.Failure("New password is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.ConfirmPassword))
+            {
+                return ServiceResult<string>.Failure("Password confirmation is required.");
+            }
+
+            // 2. Validate password match
+            if (request.NewPassword != request.ConfirmPassword)
+            {
+                return ServiceResult<string>.Failure("Passwords do not match.");
+            }
+
+            // 3. Validate password strength (minimum 8 characters, at least one uppercase, one lowercase, one number)
+            if (request.NewPassword.Length < 8)
+            {
+                return ServiceResult<string>.Failure("Password must be at least 8 characters long.");
+            }
+
+            if (!request.NewPassword.Any(char.IsUpper))
+            {
+                return ServiceResult<string>.Failure("Password must contain at least one uppercase letter.");
+            }
+
+            if (!request.NewPassword.Any(char.IsLower))
+            {
+                return ServiceResult<string>.Failure("Password must contain at least one lowercase letter.");
+            }
+
+            if (!request.NewPassword.Any(char.IsDigit))
+            {
+                return ServiceResult<string>.Failure("Password must contain at least one digit.");
+            }
+
+            // 4. Find user by email
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (user == null)
+            {
+                return ServiceResult<string>.Failure("User not found.");
+            }
+
+            // 5. Validate token and expiry
+            if (user.PasswordResetToken != request.Token)
+            {
+                return ServiceResult<string>.Failure("Invalid reset token.");
+            }
+
+            if (user.PasswordResetTokenExpiry == null || user.PasswordResetTokenExpiry < DateTime.UtcNow)
+            {
+                return ServiceResult<string>.Failure("Reset token has expired.");
+            }
+
+            // 6. Reset password
+            try
+            {
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+                user.PasswordResetToken = null;
+                user.PasswordResetTokenExpiry = null;
+
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return ServiceResult<string>.Success("Password reset successfully! You can now login with your new password.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Password reset failed: {ex.Message}");
+                return ServiceResult<string>.Failure($"Password reset failed: {ex.Message}");
+            }
+        }
+
+        // Helper method to generate secure random tokens
         private string GenerateToken()
         {
             using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
